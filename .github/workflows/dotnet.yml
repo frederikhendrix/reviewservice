@@ -1,25 +1,40 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: .NET Build and Test
 
 on:
   push:
     branches: ["main"]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - name: Restore dependencies
+
+      # Restore dependencies for the main service project
+      - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
-      - name: Build
+
+      # Build the main service project
+      - name: Build service
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
-      - name: Test
+
+      # Restore dependencies for the test project
+      - name: Restore dependencies for tests
+        run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
+
+      # Build the test project
+      - name: Build test project
+        run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
+
+      # Run tests
+      - name: Run tests
         run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity detailed
