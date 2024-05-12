@@ -17,14 +17,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      # Restore dependencies in the specific project directory
       - name: Restore dependencies
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
-
-      # Build the project in the specific directory
       - name: Build
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
-
-      # Test command needs to point to the correct test project path
       - name: Test
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal
+        run: dotnet test --no-build --verbosity normal

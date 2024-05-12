@@ -20,7 +20,7 @@ namespace ReviewService.Services
             return await _context.Reviews.ToListAsync();
         }
 
-        public async Task<Review> GetReviewByIdAsync(Guid id)
+        public async Task<Review?> GetReviewByIdAsync(Guid id)
         {
             return await _context.Reviews.FindAsync(id);
         }
