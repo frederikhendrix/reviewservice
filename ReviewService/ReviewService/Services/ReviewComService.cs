@@ -5,12 +5,12 @@ using ReviewService.Models;
 
 namespace ReviewService.Services
 {
-    public class ReviewService : IReviewService
+    public class ReviewComService : IReviewService
     {
         // Assuming you're using EF Core for database operations
         private readonly DataContext _context;
 
-        public ReviewService(DataContext context)
+        public ReviewComService(DataContext context)
         {
             _context = context;
         }

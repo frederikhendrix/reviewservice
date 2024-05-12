@@ -1,8 +1,31 @@
 version: '3.4'
 
 services:
+  postgresql:
+    image: postgres
+    container_name: postgresql
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: reviewservice
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: toor
+    ports:
+      - 5432:5432
+
   reviewservice:
     image: ${DOCKER_REGISTRY-}reviewservice
     build:
       context: .
       dockerfile: ReviewService/Dockerfile
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgresql;Port=5432;Database=reviewservice;Username=postgres;Password=toor"
+    depends_on:
+      - postgresql
+    ports:
+      - "5269:5269"
+
+volumes:
+  postgres-data:
+    driver: local
