@@ -12,8 +12,8 @@ using ReviewService.Data;
 namespace ReviewService.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240512070519_Initial-Create")]
-    partial class InitialCreate
+    [Migration("20240513094440_Test-Migration")]
+    partial class TestMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,7 +47,6 @@ namespace ReviewService.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
