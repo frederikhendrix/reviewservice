@@ -10,7 +10,7 @@ on:
 jobs:
   build:
     name: Build, analyze and deploy
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
@@ -44,15 +44,13 @@ jobs:
 
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
         run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+          mkdir -p ./.sonar/scanner
+          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
       - name: Begin SonarCloud analysis
-        shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
@@ -70,9 +68,8 @@ jobs:
         run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal
 
       - name: End SonarCloud analysis
-        shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       # New steps for building and pushing Docker images
       - name: Set up Docker Buildx
