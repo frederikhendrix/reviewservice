@@ -1,4 +1,4 @@
-name: Build, Test, and SonarCloud Analysis
+name: Build, Test, SonarCloud Analysis, and Deploy
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build, analyze and deploy
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
       - name: Begin SonarCloud analysis
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
@@ -73,3 +73,21 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      # New steps for building and pushing Docker images
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ReviewService
+          file: ./ReviewService/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/reviewservice-backend:latest

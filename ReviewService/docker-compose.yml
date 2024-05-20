@@ -17,10 +17,19 @@ services:
   reviewservice:
     image: ${DOCKER_REGISTRY-}reviewservice
     build:
-      context: .
-      dockerfile: ReviewService/Dockerfile
+      context: ./ReviewService
+      dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
-      ConnectionStrings__DefaultConnection: "Host=postgresql;Port=5432;Database=reviewservice;Username=postgres;Password=toor"
+      - ASPNETCORE_ENVIRONMENT=Development
+      - POSTGRES_HOST="${POSTGRES_HOST}"
+      - POSTGRES_PORT="${POSTGRES_PORT}"
+      - POSTGRES_DB="${POSTGRES_DB}"
+      - POSTGRES_USER="${POSTGRES_USER}"
+      - POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
+      - SERVICEBUS_CONNECTION_STRING="${SERVICEBUS_CONNECTION_STRING}"
+      - ConnectionStrings__DefaultConnection="Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
     depends_on:
       - postgresql
     ports:

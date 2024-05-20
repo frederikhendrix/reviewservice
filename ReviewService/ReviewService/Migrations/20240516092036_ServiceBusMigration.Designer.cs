@@ -12,8 +12,8 @@ using ReviewService.Data;
 namespace ReviewService.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240513094440_Test-Migration")]
-    partial class TestMigration
+    [Migration("20240516092036_ServiceBusMigration")]
+    partial class ServiceBusMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
