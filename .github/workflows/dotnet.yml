@@ -85,6 +85,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./ReviewService
-          file: ./ReviewService/Dockerfile
+          file: ./ReviewService/ReviewService/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/reviewservice-backend:latest
