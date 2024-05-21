@@ -12,65 +12,41 @@ jobs:
     name: Build, analyze and deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Disable shallow clone to get a full clone for better analysis.
+          fetch-depth: 0  # Ensures full history for SonarCloud analysis
 
-      - name: Set up JDK 17 for SonarCloud
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: "zulu"
-
-      - name: Setup .NET
+      - name: Set up .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 8.0.x  # Use the specified .NET version
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
 
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v3
-        with:
-          path: ./.sonar/scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Run tests with coverage
         run: |
-          mkdir -p ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+          dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory TestResults
+          reportgenerator -reports:TestResults/**/*.xml -targetdir:TestResults/CoverageReport -reporttypes:HtmlInline_AzurePipelines;Cobertura
 
       - name: Begin SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportPaths="coverage.opencover.xml"
-
-      - name: Restore dependencies for service
-        run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
-
-      - name: Build service
-        run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
-
-      - name: Restore dependencies for tests
-        run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
-
-      - name: Build test project
-        run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
-
-      - name: Run tests and collect code coverage
-        run: |
-          dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage/
-
-      - name: Convert coverage report to XML
-        run: |
-          reportgenerator -reports:./coverage/coverage.opencover.xml -targetdir:./coverage -reporttypes:HtmlInline_AzurePipelines;Cobertura
+          ./.sonar/scanner/dotnet-sonarscanner begin \
+            /k:"frederikhendrix_reviewservice" \
+            /o:"frederikhendrix" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="TestResults/CoverageReport/coverage.cobertura.xml"
 
       - name: End SonarCloud analysis
         run: |
