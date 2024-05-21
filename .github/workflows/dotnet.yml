@@ -12,10 +12,9 @@ jobs:
     name: Build, analyze and deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensures full history for SonarCloud analysis
+          fetch-depth: 0 # Disable shallow clone to get a full clone for better analysis.
 
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
@@ -26,21 +25,12 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.x  # Use the specified .NET version
-
-      - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
-
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
-      - name: Add .NET tools to PATH
-        run: echo "::add-path::${HOME}/.dotnet/tools"
+          dotnet-version: 8.0.x
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
-          path: ~/.sonar/cache
+          path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
@@ -48,7 +38,7 @@ jobs:
         id: cache-sonar-scanner
         uses: actions/cache@v3
         with:
-          path: ./.sonar/scanner
+          path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
@@ -56,11 +46,11 @@ jobs:
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./.sonar/scanner
-          dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
+          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
       - name: Begin SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./ReviewServiceTest/TestResults/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
@@ -74,17 +64,12 @@ jobs:
       - name: Build test project
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
-      - name: Run tests and collect code coverage
-        run: |
-          dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./ReviewServiceTest/TestResults/
-
-      - name: Generate coverage report
-        run: |
-          reportgenerator -reports:./ReviewServiceTest/TestResults/coverage.opencover.xml -targetdir:./ReviewServiceTest/TestResults/CoverageReport -reporttypes:HtmlInline_AzurePipelines;Cobertura
+      - name: Run tests
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal
 
       - name: End SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
       # New steps for building and pushing Docker images
       - name: Set up Docker Buildx
