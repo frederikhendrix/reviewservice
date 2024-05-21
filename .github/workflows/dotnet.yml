@@ -69,7 +69,7 @@ jobs:
 
       - name: End SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       # New steps for building and pushing Docker images
       - name: Set up Docker Buildx
