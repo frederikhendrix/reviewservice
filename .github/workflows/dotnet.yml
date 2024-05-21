@@ -12,9 +12,10 @@ jobs:
     name: Build, analyze and deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Disable shallow clone to get a full clone for better analysis.
+          fetch-depth: 0  # Ensures full history for SonarCloud analysis
 
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
@@ -25,7 +26,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 8.0.x  # Use the specified .NET version
+
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Add .NET tools to PATH
+        run: echo "::add-path::${HOME}/.dotnet/tools"
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
@@ -46,7 +56,7 @@ jobs:
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+          dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
 
       - name: Begin SonarCloud analysis
         run: |
