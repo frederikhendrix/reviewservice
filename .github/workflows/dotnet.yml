@@ -30,7 +30,7 @@ jobs:
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
-          path: ~\sonar\cache
+          path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
@@ -38,7 +38,7 @@ jobs:
         id: cache-sonar-scanner
         uses: actions/cache@v3
         with:
-          path: .\.sonar\scanner
+          path: ./.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
@@ -50,7 +50,7 @@ jobs:
 
       - name: Begin SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
@@ -64,8 +64,8 @@ jobs:
       - name: Build test project
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
-      - name: Run tests
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal
+      - name: Run tests with coverage
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/coverage/
 
       - name: End SonarCloud analysis
         run: |
