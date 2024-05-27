@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviewservice-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: reviewservice-backend
+  template:
+    metadata:
+      labels:
+        app: reviewservice-backend
+    spec:
+      containers:
+        - name: reviewservice-backend
+          image: rikhendrix/reviewservice-backend:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: postgres-host
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: postgres-port
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: postgres-db
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: postgres-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: postgres-password
+            - name: SERVICEBUS_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: reviewservice-secrets
+                  key: servicebus-connection-string
+            - name: ConnectionStrings__DefaultConnection
+              value: "Host=$(POSTGRES_HOST);Port=$(POSTGRES_PORT);Database=$(POSTGRES_DB);Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
