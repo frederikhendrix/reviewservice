@@ -12,8 +12,8 @@ using ReviewService.Data;
 namespace ReviewService.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240516092036_ServiceBusMigration")]
-    partial class ServiceBusMigration
+    [Migration("20240530151516_New-Review")]
+    partial class NewReview
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,8 +52,9 @@ namespace ReviewService.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("ReviewId");
 

@@ -25,8 +25,10 @@ Console.WriteLine($"ServiceBus Connection String: {serviceBusConnectionString}")
 // Add services to the container.
 builder.Services.AddScoped<IReviewService, ReviewComService>();
 builder.Services.AddControllers();
-builder.Services.AddDbContext<DataContext>(optionsAction =>
-    optionsAction.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add DbContext
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register the Azure Service Bus MessageSender and MessageReceiverService
 var topicName = builder.Configuration["ServiceBus:TopicName"];

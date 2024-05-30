@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ReviewService.Migrations
 {
     /// <inheritdoc />
-    public partial class ServiceBusMigration : Migration
+    public partial class NewReview : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,7 @@ namespace ReviewService.Migrations
                 columns: table => new
                 {
                     ReviewId = table.Column<Guid>(type: "uuid", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
                     MovieId = table.Column<Guid>(type: "uuid", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: true),
                     Score = table.Column<int>(type: "integer", nullable: false),
