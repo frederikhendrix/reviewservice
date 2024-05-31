@@ -47,5 +47,12 @@ namespace ReviewService.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Review>> GetReviewsByMovieIdAsync(Guid movieId)
+        {
+            return await _context.Reviews
+                .Where(r => r.MovieId == movieId)
+                .ToListAsync();
+        }
     }
 }

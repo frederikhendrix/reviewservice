@@ -35,6 +35,13 @@ namespace ReviewService.Controllers
             return Ok(review);
         }
 
+        [HttpGet("movie/{movieId}")]
+        public async Task<IActionResult> GetReviewsByMovieId(Guid movieId)
+        {
+            var reviews = await _reviewService.GetReviewsByMovieIdAsync(movieId);
+            return Ok(reviews);
+        }
+
         [HttpPost]
         public async Task<IActionResult> PostReview([FromBody] Review review)
         {
