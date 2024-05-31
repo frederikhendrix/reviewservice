@@ -103,8 +103,19 @@ jobs:
       - name: Set AKS context
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
 
+      - name: Create Kubernetes secret for ReviewService
+        run: |
+          kubectl create secret generic reviewservice-secrets \
+            --from-literal=postgres-host=${{ secrets.POSTGRES_HOST }} \
+            --from-literal=postgres-port=${{ secrets.POSTGRES_PORT }} \
+            --from-literal=postgres-db=${{ secrets.POSTGRES_DB }} \
+            --from-literal=postgres-user=${{ secrets.POSTGRES_USER }} \
+            --from-literal=postgres-password=${{ secrets.POSTGRES_PASSWORD }} \
+            --from-literal=servicebus-connection-string=${{ secrets.SERVICEBUS_CONNECTION_STRING }} \
+            --dry-run=client -o yaml > ./k8s/reviewservice-secrets.yaml
+          kubectl apply -f ./k8s/reviewservice-secrets.yaml
+
       - name: Deploy to AKS
         run: |
-          kubectl apply -f ./k8s/secrets.yaml
           kubectl apply -f ./k8s/deployment.yaml
           kubectl apply -f ./k8s/service.yaml
