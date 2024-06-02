@@ -15,6 +15,12 @@ var postgresUser = Environment.GetEnvironmentVariable("POSTGRES_USER")?.Trim('"'
 var postgresPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")?.Trim('"');
 var serviceBusConnectionString = Environment.GetEnvironmentVariable("SERVICEBUS_CONNECTION_STRING")?.Trim('"');
 
+// Use a dummy connection string if none is provided (for testing purposes)
+if (string.IsNullOrEmpty(serviceBusConnectionString))
+{
+    serviceBusConnectionString = "Endpoint=sb://dummy.servicebus.windows.net/;SharedAccessKeyName=DummyKey;SharedAccessKey=DummyAccessKey";
+}
+
 // Replace placeholders in the configuration
 builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Host={postgresHost};Port={postgresPort};Database={postgresDb};Username={postgresUser};Password={postgresPassword};";
 builder.Configuration["ServiceBus:ConnectionString"] = serviceBusConnectionString;
@@ -28,13 +34,22 @@ builder.Services.AddControllers();
 
 // Add DbContext
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        options.UseInMemoryDatabase("InMemoryDbForTesting");
+    }
+    else
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    }
+});
 
 // Register the Azure Service Bus MessageSender and MessageReceiverService
 var topicName = builder.Configuration["ServiceBus:TopicName"];
 var subscriptionName = builder.Configuration["ServiceBus:SubscriptionName"];
 
-builder.Services.AddSingleton(new MessageSender(serviceBusConnectionString, topicName));
+builder.Services.AddSingleton<IMessageSender>(new MessageSender(serviceBusConnectionString, topicName));
 builder.Services.AddHostedService(provider =>
     new MessageReceiverService(serviceBusConnectionString, topicName, subscriptionName));
 
@@ -44,11 +59,14 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Automatically apply migrations
-using (var scope = app.Services.CreateScope())
+// Automatically apply migrations if not testing
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-    dbContext.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
+        dbContext.Database.Migrate();
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -62,3 +80,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+public partial class Program { }

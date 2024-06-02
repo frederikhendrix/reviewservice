@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ReviewService.Bus
 {
-    public class MessageSender
+    public class MessageSender : IMessageSender
     {
         private readonly ServiceBusClient _client;
         private readonly ServiceBusSender _sender;

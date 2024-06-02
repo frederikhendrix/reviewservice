@@ -10,10 +10,9 @@ namespace ReviewService.Controllers
     public class ReviewsController : ControllerBase
     {
         private readonly IReviewService _reviewService;
-        private readonly MessageSender _messageSender;
+        private readonly IMessageSender _messageSender;
 
-
-        public ReviewsController(IReviewService reviewService, MessageSender messageSender)
+        public ReviewsController(IReviewService reviewService, IMessageSender messageSender)
         {
             _reviewService = reviewService;
             _messageSender = messageSender;
