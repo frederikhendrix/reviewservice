@@ -52,6 +52,15 @@ jobs:
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
+      - name: Verify no formatting changes
+        run: dotnet format --verify-no-changes
+
+      - name: Verify no formatting changes in solution
+        run: dotnet format Auth.Microservice.sln --verify-no-changes
+
+      - name: List vulnerable packages
+        run: dotnet list package --vulnerable
+
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
 
