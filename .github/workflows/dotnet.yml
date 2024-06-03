@@ -1,4 +1,4 @@
-name: Build, Test, and Deploy
+name: Build, Test, SonarCloud Analysis, and Deploy
 
 on:
   push:
@@ -9,14 +9,14 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Build and Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Disable shallow clone to get a full clone for better analysis.
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
         with:
           java-version: 17
@@ -26,6 +26,30 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: 8.0.x
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: ./.sonar/scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarCloud scanner
+        run: |
+          mkdir -p ./.sonar/scanner
+          dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
+
+      - name: Begin SonarCloud analysis
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
@@ -41,6 +65,10 @@ jobs:
 
       - name: Run tests with coverage
         run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/coverage/
+
+      - name: End SonarCloud analysis
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   deploy:
     name: Deploy to AKS
