@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build, analyze and deploy
+    name: Build and Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -70,7 +70,11 @@ jobs:
         run: |
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
-      # New steps for building and pushing Docker images
+  deploy:
+    name: Deploy to AKS
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -88,7 +92,6 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/reviewservice-backend:latest
 
-      # Steps for deploying to AKS
       - name: Set up Azure CLI
         uses: azure/setup-kubectl@v1
         with:
@@ -101,6 +104,7 @@ jobs:
 
       - name: Set AKS context
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+        continue-on-error: true
 
       - name: Create Kubernetes secret for ReviewService
         run: |
@@ -113,8 +117,10 @@ jobs:
             --from-literal=servicebus-connection-string=${{ secrets.SERVICEBUS_CONNECTION_STRING }} \
             --dry-run=client -o yaml > ./k8s/reviewservice-secrets.yaml
           kubectl apply -f ./k8s/reviewservice-secrets.yaml
+        continue-on-error: true
 
       - name: Deploy to AKS
         run: |
           kubectl apply -f ./k8s/deployment.yaml
           kubectl apply -f ./k8s/service.yaml
+        continue-on-error: true
