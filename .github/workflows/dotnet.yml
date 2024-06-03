@@ -52,6 +52,9 @@ jobs:
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
+      - name: Restore dependencies for service
+        run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
+
       - name: Build service
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
 
