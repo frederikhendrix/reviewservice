@@ -100,12 +100,10 @@ namespace ReviewServiceTest
             response.EnsureSuccessStatusCode();
             var responseString = await response.Content.ReadAsStringAsync();
             var result = JsonSerializer.Deserialize<List<Review>>(responseString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            for(int i  = 0; i < result.Count; i++)
-            {
-                _output.WriteLine(result[i].Text);
-            }
+
             Assert.Equal(2, result.Count);
         }
+
 
         /// <summary>
         /// Tests that the GetReviewById endpoint returns the correct review.

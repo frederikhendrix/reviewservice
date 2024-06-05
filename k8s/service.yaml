@@ -7,6 +7,6 @@ spec:
     app: reviewservice-backend
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 5269
+      targetPort: 5269
   type: ClusterIP

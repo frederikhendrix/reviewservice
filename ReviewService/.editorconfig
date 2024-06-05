@@ -1,0 +1,7 @@
+# .editorconfig
+root = true
+
+# Exclude docker-compose.dcproj from formatting
+[*.dcproj]
+# Ignore these files for formatting
+dotnet_diagnostic.CA0000.severity = none
