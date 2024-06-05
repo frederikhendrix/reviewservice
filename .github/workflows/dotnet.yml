@@ -12,9 +12,16 @@ jobs:
     name: Build and Analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Disable shallow clone to get a full clone for better analysis.
+          fetch-depth: 0
+
+      - name: List root files for debugging
+        run: ls -R
+
+      - name: List ReviewService directory for debugging
+        run: ls -R ReviewService
 
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
@@ -85,7 +92,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: List files for debugging
-        run: ls -R ../ReviewService
+        run: ls -R ./ReviewService
 
       - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
