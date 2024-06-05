@@ -85,7 +85,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: List files for debugging
-        run: ls -R ./ReviewService
+        run: ls -R ../../ReviewService
 
       - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
