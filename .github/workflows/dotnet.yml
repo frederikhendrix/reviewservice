@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build, analyze and deploy
+    name: Build and Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,10 +43,9 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar-scanner
 
       - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
           mkdir -p ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+          dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
 
       - name: Begin SonarCloud analysis
         run: |
@@ -71,7 +70,11 @@ jobs:
         run: |
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
-      # New steps for building and pushing Docker images
+  deploy:
+    name: Deploy to AKS
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
@@ -85,15 +88,14 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./ReviewService
-          file: ./ReviewService/Dockerfile
+          file: ./ReviewService/ReviewService/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/reviewservice-backend:latest
 
-      # Steps for deploying to AKS
       - name: Set up Azure CLI
         uses: azure/setup-kubectl@v1
         with:
-          version: "latest"
+          version: 'latest'
 
       - name: Log in to Azure
         uses: azure/login@v1
@@ -102,6 +104,7 @@ jobs:
 
       - name: Set AKS context
         run: az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+        continue-on-error: true
 
       - name: Create Kubernetes secret for ReviewService
         run: |
@@ -114,12 +117,10 @@ jobs:
             --from-literal=servicebus-connection-string=${{ secrets.SERVICEBUS_CONNECTION_STRING }} \
             --dry-run=client -o yaml > ./k8s/reviewservice-secrets.yaml
           kubectl apply -f ./k8s/reviewservice-secrets.yaml
+        continue-on-error: true
 
       - name: Deploy to AKS
         run: |
           kubectl apply -f ./k8s/deployment.yaml
           kubectl apply -f ./k8s/service.yaml
-
-      - name: Force rollout restart
-        run: |
-          kubectl rollout restart deployment reviewservice-backend
+        continue-on-error: true
