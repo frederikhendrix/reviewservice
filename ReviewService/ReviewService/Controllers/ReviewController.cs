@@ -45,7 +45,7 @@ namespace ReviewService.Controllers
         public async Task<IActionResult> PostReview([FromBody] Review review)
         {
             var createdReview = await _reviewService.AddReviewAsync(review);
-            var messageBody = $"New review created: {createdReview.ReviewId}";
+            var messageBody = $"New review create: {createdReview.ReviewId}";
             await _messageSender.SendMessageAsync(messageBody);
             return CreatedAtAction(nameof(GetReview), new { id = createdReview.ReviewId }, createdReview);
         }
