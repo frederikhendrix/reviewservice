@@ -71,7 +71,24 @@ jobs:
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
       - name: Run tests with coverage
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/coverage/
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/coverage/ /p:ExcludeByFile=\"**/ReviewService/ReviewService/Migrations/*\"
+
+      - name: Report test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./TestResults
+
+      - name: Enforce coverage threshold
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:./TestResults/coverage/coverage.opencover.xml -targetdir:coveragereport -reporttypes:Html
+          coverage_threshold=$(reportgenerator -reports:./TestResults/coverage/coverage.opencover.xml -targetdir:coveragereport -reporttypes:HtmlSummary | grep "Line coverage:" | awk '{print $3}' | sed 's/%//')
+          echo "Code coverage is $coverage_threshold%"
+          if [ $(echo "$coverage_threshold < 90" | bc) -ne 0 ]; then
+            echo "Code coverage is below 90%"
+            exit 1
+          fi
 
       - name: End SonarCloud analysis
         run: |
