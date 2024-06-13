@@ -54,5 +54,10 @@ namespace ReviewService.Services
                 .Where(r => r.MovieId == movieId)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<Review>> GetReviewsByUserIdAsync(string userId)
+        {
+            return await _context.Reviews.Where(r => r.UserId == userId).ToListAsync();
+        }
     }
 }

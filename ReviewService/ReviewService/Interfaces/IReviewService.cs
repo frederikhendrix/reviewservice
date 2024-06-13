@@ -11,5 +11,7 @@ namespace ReviewService.Interfaces
         Task UpdateReviewAsync(Review review);
         Task DeleteReviewAsync(Guid id);
         Task<IEnumerable<Review>> GetReviewsByMovieIdAsync(Guid movieId);
+        Task<IEnumerable<Review>> GetReviewsByUserIdAsync(string userId);
+
     }
 }

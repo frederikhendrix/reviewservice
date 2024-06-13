@@ -66,5 +66,12 @@ namespace ReviewService.Controllers
             await _reviewService.DeleteReviewAsync(id);
             return NoContent();
         }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetReviewsByUserId(string userId)
+        {
+            var reviews = await _reviewService.GetReviewsByUserIdAsync(userId);
+            return Ok(reviews);
+        }
     }
 }
