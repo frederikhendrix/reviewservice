@@ -56,7 +56,7 @@ jobs:
 
       - name: Begin SonarQube analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://localhost:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://127.0.0.1:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Restore dependencies for service
         run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
