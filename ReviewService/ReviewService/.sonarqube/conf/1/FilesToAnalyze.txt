@@ -1,0 +1,30 @@
+﻿C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Bus\IMessageSender.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Bus\MessageReceiver.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Bus\MessageReceiverService.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Bus\MessageSender.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Controllers\ReviewController.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Data\DataContext.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Data\DataContextFactory.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\DTO\ValidationRequest.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\DTO\ValidationResponse.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Interfaces\IReviewService.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Migrations\20240530151516_New-Review.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Migrations\20240530151516_New-Review.Designer.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Migrations\DataContextModelSnapshot.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Models\Review.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Program.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Services\ReviewComService.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\obj\Debug\net8.0\ReviewService.GlobalUsings.g.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\obj\Debug\net8.0\.NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\obj\Debug\net8.0\ReviewService.AssemblyInfo.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\obj\Debug\net8.0\ReviewService.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\appsettings.Development.json
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\appsettings.json
+C:\Users\Rikhe\.nuget\packages\xunit.runner.visualstudio\2.8.1\build\net6.0\xunit.runner.visualstudio.testadapter.dll
+C:\Users\Rikhe\.nuget\packages\xunit.runner.visualstudio\2.8.1\build\net6.0\xunit.runner.reporters.netcoreapp10.dll
+C:\Users\Rikhe\.nuget\packages\xunit.runner.visualstudio\2.8.1\build\net6.0\xunit.runner.utility.netcoreapp10.dll
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Dockerfile
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Dockerfile.dev
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\ReviewService.http
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\ReviewService\Properties\launchSettings.json
+C:\Users\Rikhe\Documents\SEMESTER 6\IndividueelProject\Backend\ReviewService\ReviewService\.dockerignore
