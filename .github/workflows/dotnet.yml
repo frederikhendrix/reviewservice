@@ -43,7 +43,7 @@ jobs:
       - name: Restore dependencies for ReviewServiceTest
         run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
 
-     - name: Cache SonarQube packages
+      - name: Cache SonarQube packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
@@ -65,7 +65,7 @@ jobs:
 
       - name: Begin SonarQube analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://host.docker.internal:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Build service
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
