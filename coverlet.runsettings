@@ -5,6 +5,9 @@
         <Configuration>
           <ExcludeByFile>
              **/ReviewService/Migrations/**
+             **/ReviewService/DTO/**
+             **/ReviewService/Data/**
+             **/ReviewService/Bus/**
           </ExcludeByFile>
         </Configuration>
       </DataCollector>
