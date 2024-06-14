@@ -50,6 +50,12 @@ jobs:
       - name: Restore dependencies for ReviewServiceTest
         run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
 
+      - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./ReviewServiceTest/TestResults/coverage.opencover.xml"
+
       - name: Build ReviewService
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
 
@@ -65,17 +71,11 @@ jobs:
           name: test-results
           path: ./ReviewServiceTest/TestResults
 
-      - name: Begin SonarCloud analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-
       - name: End SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   deploy:
     name: Deploy to AKS
