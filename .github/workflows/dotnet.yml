@@ -57,15 +57,16 @@ jobs:
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
       - name: Run tests with coverage
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./ReviewServiceTest/TestResults/ /p:Exclude="[ReviewService/ReviewService/Migrations]*"
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./ReviewServiceTest/TestResults/ /p:ExcludeByFile="**/Migrations/*"
 
       - name: Find coverage report
         id: locate-coverage
-        run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.opencover.xml')"
+        run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.cobertura.xml')"
 
-      - name: Enforce coverage thresholdd
+      - name: Enforce coverage threshold
         run: |
-          coverage=$(jq -r '.Counters | .covered + .missed as $total | ((.covered / $total) * 100' <${{ steps.locate-coverage.outputs.path }}))
+          coverage=$(grep -Po '(?<=line-rate=")[0-9.]+' ${{ steps.locate-coverage.outputs.path }})
+          coverage=$(echo "$coverage * 100" | bc)
           echo "Code coverage is $coverage%"
           if (( $(echo "$coverage < 50" | bc -l) )); then
             echo "Code coverage is below 50%"
@@ -76,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: coveragereport
+          path: ${{ steps.locate-coverage.outputs.path }}
 
       - name: Upload test results and coverage report
         uses: actions/upload-artifact@v3
