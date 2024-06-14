@@ -1,0 +1,16 @@
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <ExcludeByFile>
+            **/ReviewService/ReviewService/Data/*
+            **/ReviewService/ReviewService/DTO/*
+            **/ReviewService/ReviewService/Migrations/*
+            **/ReviewService/ReviewService/Bus/*
+          </ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
