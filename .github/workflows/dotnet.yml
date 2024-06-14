@@ -63,7 +63,7 @@ jobs:
         id: locate-coverage
         run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.opencover.xml')"
 
-      - name: Enforce coverage threshold
+      - name: Enforce coverage thresholdd
         run: |
           coverage=$(jq -r '.Counters | .covered + .missed as $total | (.covered / $total) * 100' <${{ steps.locate-coverage.outputs.path }})
           echo "Code coverage is $coverage%"
