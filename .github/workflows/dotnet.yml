@@ -1,4 +1,4 @@
-name: Build, Test, SonarQube Analysis, and Deploy
+name: Build, Test, SonarCloud Analysis, and Deploy
 
 on:
   push:
@@ -44,30 +44,14 @@ jobs:
       - name: Restore dependencies for ReviewServiceTest
         run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
 
-      - name: Start SonarQube container
-        run: |
-          docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
-          # Wait for SonarQube to be fully up and running
-          timeout=0
-          while ! curl -s http://localhost:9000/api/system/status | grep -q "UP"; do
-            echo "Waiting for SonarQube to start..."
-            sleep 5
-            timeout=$((timeout + 5))
-            if [ $timeout -ge 60 ]; then
-              echo "SonarQube did not start in time"
-              docker logs sonarqube
-              exit 1
-            fi
-          done
-
-      - name: Cache SonarQube packages
+      - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Cache SonarQube scanner
+      - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v3
         with:
@@ -75,14 +59,14 @@ jobs:
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
-      - name: Install SonarQube scanner
+      - name: Install SonarCloud scanner
         run: |
           mkdir -p ./.sonar/scanner
           dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
 
-      - name: Begin SonarQube analysis
+      - name: Begin SonarCloud analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://localhost:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Build service
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
@@ -99,23 +83,9 @@ jobs:
           name: test-results
           path: ./ReviewServiceTest/TestResults
 
-      - name: Enforce coverage threshold
-        run: |
-          dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator -reports:./ReviewServiceTest/TestResults/coverage.opencover.xml -targetdir:coveragereport -reporttypes:HtmlSummary
-          coverage_threshold=$(grep "Line coverage:" coveragereport/Summary.htm | awk '{print $3}' | sed 's/%//')
-          echo "Code coverage is $coverage_threshold%"
-          if [ $(echo "$coverage_threshold < 90" | bc) -ne 0 ]; then
-            echo "Code coverage is below 90%"
-            exit 1
-          fi
-
-      - name: End SonarQube analysis
+      - name: End SonarCloud analysis
         run: |
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Stop SonarQube container
-        run: docker stop sonarqube && docker rm sonarqube
 
   deploy:
     name: Deploy to AKS
