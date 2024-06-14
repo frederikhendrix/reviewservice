@@ -57,7 +57,7 @@ jobs:
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
       - name: Run tests with coverage
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./ReviewServiceTest/TestResults/ /p:ExcludeByFile="**/Data/*,**/Migrations/*,**/Bus/*"
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./ReviewServiceTest/TestResults/ "/p:ExcludeByFile=**/Data/*,**/DTO/*,**/Migrations/*,**/Bus/*"
 
       - name: Find coverage report
         id: locate-coverage
