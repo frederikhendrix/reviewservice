@@ -13,41 +13,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: List root files for debugging
-        run: ls -R
-
-      - name: List ReviewService directory for debugging
-        run: ls -R ReviewService
-
-      - name: List ReviewServiceTest directory for debugging
-        run: ls -R ReviewServiceTest
-
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: "zulu"
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v2
+      - uses: actions/checkout@v3
         with:
-          dotnet-version: 8.0.x
-
-      - name: Restore dependencies for ReviewService
-        run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
-
-      - name: Restore dependencies for ReviewServiceTest
-        run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
+          fetch-depth: 0
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
-          path: ~/.sonar/cache
+          path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
@@ -55,23 +34,34 @@ jobs:
         id: cache-sonar-scanner
         uses: actions/cache@v3
         with:
-          path: ./.sonar/scanner
+          path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
       - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
         run: |
-          mkdir -p ./.sonar/scanner
-          dotnet tool install dotnet-sonarscanner --tool-path ./.sonar/scanner
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
       - name: Begin SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
-      - name: Build service
+      - name: Restore dependencies for ReviewService
+        run: dotnet restore ./ReviewService/ReviewService/ReviewService.csproj
+
+      - name: Restore dependencies for ReviewServiceTest
+        run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
+
+      - name: Build ReviewService
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
 
-      - name: Build test project
+      - name: Build ReviewServiceTest
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
       - name: Run tests with coverage
@@ -84,8 +74,11 @@ jobs:
           path: ./ReviewServiceTest/TestResults
 
       - name: End SonarCloud analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
   deploy:
     name: Deploy to AKS
