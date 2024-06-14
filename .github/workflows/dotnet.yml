@@ -11,6 +11,7 @@ jobs:
   build:
     name: Build and Analyze
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -43,6 +44,22 @@ jobs:
       - name: Restore dependencies for ReviewServiceTest
         run: dotnet restore ./ReviewServiceTest/ReviewServiceTest.csproj
 
+      - name: Start SonarQube container
+        run: |
+          docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
+          # Wait for SonarQube to be fully up and running
+          timeout=0
+          while ! curl -s http://localhost:9000/api/system/status | grep -q "UP"; do
+            echo "Waiting for SonarQube to start..."
+            sleep 5
+            timeout=$((timeout + 5))
+            if [ $timeout -ge 60 ]; then
+              echo "SonarQube did not start in time"
+              docker logs sonarqube
+              exit 1
+            fi
+          done
+
       - name: Cache SonarQube packages
         uses: actions/cache@v3
         with:
@@ -65,7 +82,7 @@ jobs:
 
       - name: Begin SonarQube analysis
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://host.docker.internal:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"reviewservice" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="http://localhost:9000" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
       - name: Build service
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
@@ -74,7 +91,7 @@ jobs:
         run: dotnet build ./ReviewServiceTest/ReviewServiceTest.csproj --no-restore
 
       - name: Run tests with coverage
-        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/
+        run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./ReviewServiceTest/TestResults/
 
       - name: Upload test results and coverage report
         uses: actions/upload-artifact@v3
@@ -96,6 +113,9 @@ jobs:
       - name: End SonarQube analysis
         run: |
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Stop SonarQube container
+        run: docker stop sonarqube && docker rm sonarqube
 
   deploy:
     name: Deploy to AKS
