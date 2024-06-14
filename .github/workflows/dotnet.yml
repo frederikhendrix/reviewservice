@@ -63,9 +63,12 @@ jobs:
         id: locate-coverage
         run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.cobertura.xml')"
 
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
       - name: Enforce coverage threshold
         run: |
-          coverage=$(grep -Po '(?<=line-rate=")[0-9.]+' ${{ steps.locate-coverage.outputs.path }})
+          coverage=$(xmllint --xpath "string(//coverage/@line-rate)" ${{ steps.locate-coverage.outputs.path }})
           coverage=$(echo "$coverage * 100" | bc)
           echo "Code coverage is $coverage%"
           if (( $(echo "$coverage < 50" | bc -l) )); then
