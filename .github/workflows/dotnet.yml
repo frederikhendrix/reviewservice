@@ -59,8 +59,12 @@ jobs:
       - name: Run tests with coverage
         run: dotnet test ./ReviewServiceTest/ReviewServiceTest.csproj --collect:"XPlat Code Coverage" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./ReviewServiceTest/TestResults/
 
+      - name: Find coverage report
+        id: locate-coverage
+        run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.cobertura.xml')"
+
       - name: Display coverage report
-        run: cat ./ReviewServiceTest/TestResults/coverage.opencover.xml
+        run: cat ${{ steps.locate-coverage.outputs.path }}
 
       - name: Upload test results and coverage report
         uses: actions/upload-artifact@v3
@@ -72,7 +76,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./ReviewServiceTest/TestResults/coverage.opencover.xml"
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"frederikhendrix_reviewservice" /o:"frederikhendrix" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="${{ steps.locate-coverage.outputs.path }}"
 
       - name: Build ReviewService (for SonarCloud)
         run: dotnet build ./ReviewService/ReviewService/ReviewService.csproj --no-restore
@@ -84,7 +88,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
 
   deploy:
     name: Deploy to AKS
