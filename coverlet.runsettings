@@ -4,18 +4,10 @@
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
           <ExcludeByFile>
-            **/Data/*
-            **/DTO/*
-            **/Migrations/*
-            **/Bus/*
-            **/ReviewService/ReviewService/Data/*
-            **/ReviewService/ReviewService/DTO/*
-            **/ReviewService/ReviewService/Migrations/*
-            **/ReviewService/ReviewService/Bus/*
-            ./ReviewService/ReviewService/Data/*
-            ./ReviewService/ReviewService/DTO/*
-            ./ReviewService/ReviewService/Migrations/*
-            ./ReviewService/ReviewService/Bus/*
+            **/ReviewService/ReviewService/Data/**
+            **/ReviewService/ReviewService/DTO/**
+            **/ReviewService/ReviewService/Migrations/**
+            **/ReviewService/ReviewService/Bus/**
           </ExcludeByFile>
         </Configuration>
       </DataCollector>
