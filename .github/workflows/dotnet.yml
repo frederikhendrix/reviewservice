@@ -63,8 +63,20 @@ jobs:
         id: locate-coverage
         run: echo "##[set-output name=path;]$(find ./ReviewServiceTest/TestResults/ -name 'coverage.cobertura.xml')"
 
-      - name: Display coverage report
-        run: cat ${{ steps.locate-coverage.outputs.path }}
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Generate coverage report
+        run: reportgenerator -reports:${{ steps.locate-coverage.outputs.path }} -targetdir:coveragereport -reporttypes:Html
+
+      - name: Display coverage summary
+        run: cat coveragereport/index.htm
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coveragereport
 
       - name: Upload test results and coverage report
         uses: actions/upload-artifact@v3
