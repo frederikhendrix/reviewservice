@@ -21,7 +21,7 @@ namespace ReviewService.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllReviews()
         {
-            return Ok(await _reviewService.GetAllReviewsAsync());
+            return Ok(await _reviewService.GetAllReviewsAsync()); 
         }
 
         [HttpGet("{id}")]
